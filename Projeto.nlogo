@@ -1,9 +1,9 @@
-globals [AvgWaterQuality FoodEaten FoodDestroyed]
+globals [AvgWaterQuality FoodEaten FoodDestroyed Nascimentos Mortes MortesAge]
 breed [peixes1 peixe1]
 breed [peixes2 peixe2]
 breed [comidas comida]
-peixes1-own[canBreed age hp]
-peixes2-own[canBreed age hp]
+peixes1-own[canBreed age hp dieAge]
+peixes2-own[canBreed age hp dieAge]
 patches-own [quality]
 comidas-own [decay]
 
@@ -15,6 +15,8 @@ clear-all
 set heading random 360
     set size 1.5
     set shape "fish"
+
+   set dieAge  avgAgeEspecie1 + (random avgAgeEspecie1 / 3) - avgAgeEspecie1 / 6
     set hp 100
   ]
 
@@ -24,6 +26,8 @@ set heading random 360
 set heading random 360
     set size 1.5
     set shape "fish"
+
+    set dieAge  avgAgeEspecie2 + (random avgAgeEspecie2 / 3) - avgAgeEspecie2 / 6
     set hp 100
 
   ]
@@ -41,8 +45,18 @@ to Go
     user-message "Todos os peixes morreram"
     stop
   ]
+
+  ;;Dano
   ask turtles with [breed != comidas] [
-    if hp <= 0 [die]
+    if hp <= 0 [
+      set Mortes Mortes + 1
+      die
+    ]
+    if age >= dieAge [
+      set MortesAge MortesAge + 1
+      set Mortes Mortes + 1
+      die
+    ]
     let thisquality [quality] of patch-here
     ifelse thisquality > 100[
       set thisquality 100
@@ -52,9 +66,21 @@ to Go
     ]
 
     set hp hp - (DmgTick * (3 - (thisquality / 50 )))
+
+    ;;Incrementa Age
+    if ticks mod TicksPerAge = 0 [
+      set age age + 1
+    ]
+
+
+
+
+    ;;muda posiçao
     if pxcor = 32 or pxcor = -32 or pycor = 32 or pycor = -32[
       set heading random 360
     ]
+
+    ;;comer
     if  count comidas-here != 0[
       ask one-of comidas-here[die]
       set size size + 0.01
@@ -63,6 +89,8 @@ to Go
       set FoodEaten FoodEaten + 1
       set canBreed 1
     ]
+
+    ;;reproduzir
     let thisbreed breed
     let thiswho who
     let targ (one-of (turtles-here with [who != thiswho and breed = thisbreed and breed != comidas] ))
@@ -74,12 +102,15 @@ to Go
         hatch 1 [
           set age 0
           set hp 100
+          set Nascimentos Nascimentos + 1
         ]
         ]
   ]
     ]
   fd 1
   ]
+
+  ;;movimento comida
   ask comidas[
       if pycor != -32[
     if ticks mod (random 10 + 1) = 0  [
@@ -87,6 +118,8 @@ to Go
       fd 1
       ]
       ]
+
+    ;;detruir comida
     if decay = 0[
       ask patch-here[
         set quality quality - Pol_Comida
@@ -98,10 +131,15 @@ to Go
     set decay decay - 1
   ]
 
+  ;;call
   SpreadWaterQuality
+  BombaAgua
 
+  ;;CA media
   ask patches[    set AvgWaterQuality AvgWaterQuality + quality ]
 
+
+  ;;fix water every 50t
     if ticks mod 50 = 0[
     ask patches with [quality < 0] [
 
@@ -114,8 +152,13 @@ to Go
 
   ]
   ]
-    set AvgWaterQuality AvgWaterQuality / (count patches)
 
+
+  ;;calcula media
+  set AvgWaterQuality AvgWaterQuality / (count patches)
+
+
+  ;;agua poluida
   if AvgWaterQuality < 0[
     ask patches[set pcolor 90 set quality 0]
     set AvgWaterQuality 0
@@ -123,13 +166,15 @@ to Go
   ;;stop
   ]
 
-
+;;alimentar
   if random (100 - Feed_Prob_Per_Tick) = 0[
     Feed
   ]
 
 tick
 end
+
+
 
 to Feed
 
@@ -257,6 +302,21 @@ to SpreadWaterQuality
   ]
 end
 
+
+;;Bomba de agua
+
+to BombaAgua
+  if BombaDeAgua = true[
+  if ticks mod (101 - PurifyRate) = 0[
+  ask patches with [ ( (abs( pxcor ) = 32) or  (abs ( pxcor ) = 31)) and (pycor = -32 or pycor = -31)][
+    set quality quality + ((100 - quality) * PurifyAmount)
+    ]
+    ]
+  ]
+end
+
+
+
 to Debug
 create-peixes1 Especie1[
     set color red
@@ -322,7 +382,7 @@ Especie1
 Especie1
 0
 50
-5.0
+10.0
 1
 1
 NIL
@@ -337,7 +397,7 @@ Especie2
 Especie2
 0
 50
-5.0
+10.0
 1
 1
 NIL
@@ -405,7 +465,7 @@ Qtd_Comida
 Qtd_Comida
 1
 250
-64.0
+60.0
 1
 1
 NIL
@@ -544,6 +604,136 @@ DmgTick
 1
 NIL
 HORIZONTAL
+
+SLIDER
+1003
+273
+1175
+306
+PurifyRate
+PurifyRate
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
+
+SWITCH
+871
+210
+988
+243
+BombaDeAgua
+BombaDeAgua
+0
+1
+-1000
+
+SLIDER
+1190
+273
+1362
+306
+PurifyAmount
+PurifyAmount
+0
+1
+0.03
+0.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1190
+164
+1363
+198
+TicksPerAge
+TicksPerAge
+1
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1004
+218
+1177
+252
+AvgAgeEspecie1
+AvgAgeEspecie1
+1
+50
+25.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1190
+218
+1363
+252
+AvgAgeEspecie2
+AvgAgeEspecie2
+1
+50
+25.0
+1
+1
+NIL
+HORIZONTAL
+
+MONITOR
+1909
+87
+1992
+132
+NIL
+Mortes
+17
+1
+11
+
+MONITOR
+1909
+143
+2049
+188
+Nascimentos vs Mortes
+Nascimentos / Mortes
+17
+1
+11
+
+MONITOR
+1909
+34
+1992
+79
+NIL
+Nascimentos
+17
+1
+11
+
+MONITOR
+2012
+87
+2122
+132
+Mortes por Idade
+MortesAge
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
