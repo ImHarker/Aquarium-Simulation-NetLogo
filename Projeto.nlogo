@@ -81,6 +81,11 @@ to Go
 
 
     ;;muda posiçao
+
+    if random-float 1 < 0.1[
+      set heading heading - 45 + random 90
+    ]
+
     if pxcor = 32 or pxcor = -32 or pycor = 32 or pycor = -32[
       set heading random 360
     ]
@@ -648,7 +653,7 @@ SWITCH
 1005
 300
 1179
-334
+333
 BombaDeAgua
 BombaDeAgua
 0
@@ -664,7 +669,7 @@ PurifyAmount
 PurifyAmount
 0
 1
-0.55
+0.3
 0.01
 1
 NIL
@@ -763,7 +768,7 @@ SLIDER
 1192
 164
 1365
-198
+197
 BreedCooldown
 BreedCooldown
 0
@@ -778,7 +783,7 @@ SLIDER
 1005
 208
 1178
-242
+241
 MinBreedAgeEspecie1
 MinBreedAgeEspecie1
 0
@@ -793,7 +798,7 @@ SLIDER
 1192
 208
 1365
-242
+241
 MinBreedAgeEspecie2
 MinBreedAgeEspecie2
 0
