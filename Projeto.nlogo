@@ -2,13 +2,18 @@ globals [AvgWaterQuality FoodEaten FoodDestroyed Nascimentos Mortes MortesAge]
 breed [peixes1 peixe1]
 breed [peixes2 peixe2]
 breed [comidas comida]
-peixes1-own[canBreed age hp dieAge]
-peixes2-own[canBreed age hp dieAge]
+peixes1-own[canBreed age hp dieAge breedCD]
+peixes2-own[canBreed age hp dieAge breedCD]
 patches-own [quality]
 comidas-own [decay]
 
 to Setup
 clear-all
+
+  if AvgAgeEspecie1 <= MinBreedAgeEspecie1 or AvgAgeEspecie2 <= MinBreedAgeEspecie2[
+    user-message "A idade mínima para reprodução é demasiado elevada! Os peixes não se vão reproduzir!"
+  ]
+
   create-peixes1 Especie1[
     set color red
         setxy random-pxcor random-pycor
@@ -87,23 +92,23 @@ to Go
       set hp hp + 25
       if hp > 100 [ set hp 100]
       set FoodEaten FoodEaten + 1
-      set canBreed 1
+      if BreedCD <= 0[
+        set canBreed 1
+      ]
     ]
 
     ;;reproduzir
+    set BreedCD BreedCD - 1
     let thisbreed breed
     let thiswho who
     let targ (one-of (turtles-here with [who != thiswho and breed = thisbreed and breed != comidas] ))
     if targ != nobody[
     if( [canBreed] of targ = 1 and canBreed = 1)[
-        ask targ[ set canBreed 0]
-        set canBreed 0
-        if random (100 - Prob_Nascer) = 0[
-        hatch 1 [
-          set age 0
-          set hp 100
-          set Nascimentos Nascimentos + 1
+        if breed = peixes1 and age >= MinBreedAgeEspecie1 and [age] of targ >= MinBreedAgeEspecie1 [
+          BreedF self targ
         ]
+        if breed = peixes2 and age >= MinBreedAgeEspecie2 and [age] of targ >= MinBreedAgeEspecie2 [
+          BreedF self targ
         ]
   ]
     ]
@@ -119,7 +124,7 @@ to Go
       ]
       ]
 
-    ;;detruir comida
+    ;;destruir comida
     if decay = 0[
       ask patch-here[
         set quality quality - Pol_Comida
@@ -316,6 +321,25 @@ to BombaAgua
 end
 
 
+to BreedF [this targ]
+  ask targ[
+    set canBreed 0
+    set BreedCD BreedCooldown
+  ]
+  ask this [
+    set canBreed 0
+    set BreedCD BreedCooldown
+  ]
+  if random (100 - Prob_Nascer) = 0[
+    hatch 1 [
+      set age 0
+      set hp 100
+      set Nascimentos Nascimentos + 1
+      set BreedCD 0
+    ]
+  ]
+
+end
 
 to Debug
 create-peixes1 Especie1[
@@ -473,9 +497,9 @@ HORIZONTAL
 
 PLOT
 1410
-412
+405
 1874
-776
+769
 Variação da Comida
 Ticks
 Quantidade Comida
@@ -490,11 +514,11 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count comidas"
 
 PLOT
-954
-412
-1391
-776
-Variação da Qualidade Media da Agua
+955
+405
+1392
+769
+Variação da Qualidade Média da Água
 Ticks
 Qualidade Media da Agua
 0.0
@@ -555,11 +579,11 @@ NIL
 HORIZONTAL
 
 PLOT
-954
-797
-1391
-1197
-Taxa de Aproveitamento da Comida
+1899
+405
+2337
+769
+Taxa de Aproveitamento de Comida
 Ticks
 Taxa (FoodEaten / TotalFood)
 0.0
@@ -606,10 +630,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1003
-273
-1175
-306
+1007
+348
+1179
+381
 PurifyRate
 PurifyRate
 0
@@ -621,10 +645,10 @@ NIL
 HORIZONTAL
 
 SWITCH
-871
-210
-988
-243
+1005
+300
+1179
+334
 BombaDeAgua
 BombaDeAgua
 0
@@ -632,15 +656,15 @@ BombaDeAgua
 -1000
 
 SLIDER
-1190
-273
-1362
-306
+1192
+348
+1364
+381
 PurifyAmount
 PurifyAmount
 0
 1
-0.03
+0.55
 0.01
 1
 NIL
@@ -648,9 +672,9 @@ HORIZONTAL
 
 SLIDER
 1190
-164
+299
 1363
-198
+332
 TicksPerAge
 TicksPerAge
 1
@@ -662,15 +686,15 @@ NIL
 HORIZONTAL
 
 SLIDER
-1004
-218
-1177
+1005
 252
+1178
+285
 AvgAgeEspecie1
 AvgAgeEspecie1
 1
 50
-25.0
+40.0
 1
 1
 NIL
@@ -678,14 +702,14 @@ HORIZONTAL
 
 SLIDER
 1190
-218
-1363
 252
+1363
+285
 AvgAgeEspecie2
 AvgAgeEspecie2
 1
 50
-25.0
+40.0
 1
 1
 NIL
@@ -731,6 +755,84 @@ MONITOR
 132
 Mortes por Idade
 MortesAge
+17
+1
+11
+
+SLIDER
+1192
+164
+1365
+198
+BreedCooldown
+BreedCooldown
+0
+200
+25.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1005
+208
+1178
+242
+MinBreedAgeEspecie1
+MinBreedAgeEspecie1
+0
+30
+3.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1192
+208
+1365
+242
+MinBreedAgeEspecie2
+MinBreedAgeEspecie2
+0
+30
+3.0
+1
+1
+NIL
+HORIZONTAL
+
+MONITOR
+1910
+265
+2053
+310
+Nº Elementos Especie 1
+count peixes1
+17
+1
+11
+
+MONITOR
+2063
+265
+2206
+310
+Nº Elementos Especie 2
+count peixes2
+17
+1
+11
+
+MONITOR
+1910
+204
+2027
+249
+Nº de Peixes Vivos
+count peixes1 + count peixes2
 17
 1
 11
