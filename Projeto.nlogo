@@ -1,7 +1,8 @@
 globals [AvgWaterQuality FoodEaten FoodDestroyed Nascimentos Mortes MortesAge]
+breed [comidas comida]
+breed [plantas planta]
 breed [peixes1 peixe1]
 breed [peixes2 peixe2]
-breed [comidas comida]
 peixes1-own[canBreed age hp dieAge breedCD]
 peixes2-own[canBreed age hp dieAge breedCD]
 patches-own [quality]
@@ -12,6 +13,14 @@ clear-all
 
   if AvgAgeEspecie1 <= MinBreedAgeEspecie1 or AvgAgeEspecie2 <= MinBreedAgeEspecie2[
     user-message "A idade mínima para reprodução é demasiado elevada! Os peixes não se vão reproduzir!"
+  ]
+
+  create-plantas  3 + random 4[
+    set shape "plant"
+    set size 5
+    set color green
+    setxy (32 - (random 64)) ((random 14) - 30)
+
   ]
 
   create-peixes1 Especie1[
@@ -40,19 +49,22 @@ set heading random 360
 ask patches [
   set pcolor 96
   set quality 100
+    if pycor < 15 - 32[
+      set pcolor yellow - 0.6
+    ]
 ]
 reset-ticks
 end
 
 to Go
   set AvgWaterQuality 0
-  if count turtles with [breed != comidas] = 0 [
+  if count turtles with [breed != comidas and breed != plantas] = 0 [
     user-message "Todos os peixes morreram"
     stop
   ]
 
   ;;Dano
-  ask turtles with [breed != comidas] [
+  ask turtles with [breed != comidas and breed != plantas] [
     if hp <= 0 [
       set Mortes Mortes + 1
       die
@@ -106,7 +118,7 @@ to Go
     set BreedCD BreedCD - 1
     let thisbreed breed
     let thiswho who
-    let targ (one-of (turtles-here with [who != thiswho and breed = thisbreed and breed != comidas] ))
+    let targ (one-of (turtles-here with [who != thiswho and breed = thisbreed and breed != comidas and breed != plantas] ))
     if targ != nobody[
     if( [canBreed] of targ = 1 and canBreed = 1)[
         if breed = peixes1 and age >= MinBreedAgeEspecie1 and [age] of targ >= MinBreedAgeEspecie1 [
@@ -577,7 +589,7 @@ Feed_Prob_Per_Tick
 Feed_Prob_Per_Tick
 0.05
 100
-0.05
+1.75
 0.05
 1
 NIL
