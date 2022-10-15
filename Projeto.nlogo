@@ -9,7 +9,7 @@ patches-own [quality]
 comidas-own [decay]
 
 to Setup
-clear-all
+  clear-all
 
   if AvgAgeEspecie1 <= MinBreedAgeEspecie1 or AvgAgeEspecie2 <= MinBreedAgeEspecie2[
     user-message "A idade mínima para reprodução é demasiado elevada! Os peixes não se vão reproduzir!"
@@ -25,19 +25,19 @@ clear-all
 
   create-peixes1 Especie1[
     set color red
-        setxy random-pxcor random-pycor
-set heading random 360
+    setxy random-pxcor random-pycor
+    set heading random 360
     set size 1.5
     set shape "fish"
 
-   set dieAge  avgAgeEspecie1 + (random avgAgeEspecie1 / 3) - avgAgeEspecie1 / 6
+    set dieAge  avgAgeEspecie1 + (random avgAgeEspecie1 / 3) - avgAgeEspecie1 / 6
     set hp 100
   ]
 
-    create-peixes2 Especie2[
+  create-peixes2 Especie2[
     set color yellow
     setxy random-pxcor random-pycor
-set heading random 360
+    set heading random 360
     set size 1.5
     set shape "fish"
 
@@ -46,14 +46,14 @@ set heading random 360
 
   ]
 
-ask patches [
-  set pcolor 96
-  set quality 100
+  ask patches [
+    set pcolor 96
+    set quality 100
     if pycor < 15 - 32[
       set pcolor yellow - 0.6
     ]
-]
-reset-ticks
+  ]
+  reset-ticks
 end
 
 to Go
@@ -77,7 +77,7 @@ to Go
     let thisquality [quality] of patch-here
     ifelse thisquality > 100[
       set thisquality 100
-    ] [ if thisquality < 0[
+      ] [ if thisquality < 0[
         set thisquality 0
       ]
     ]
@@ -129,24 +129,25 @@ to Go
         ]
   ]
     ]
-  fd 1
+    fd 1
   ]
 
   ;;movimento comida
   ask comidas[
-      if pycor != -32[
-    if ticks mod (random 10 + 1) = 0  [
-    set heading one-of[ 135 180 225]
+    if pycor != -32[
+      if ticks mod (random 10 + 1) = 0  [
+        set heading one-of[ 135 180 225]
       fd 1
       ]
-      ]
+    ]
 
     ;;destruir comida
     if decay = 0[
       ask patch-here[
         set quality quality - Pol_Comida
-        ifelse quality >= 0[ set pcolor 0.06 * quality + 90 ]  [set pcolor 90 ]
-        ]
+        PatchColor self
+
+      ]
       set FoodDestroyed FoodDestroyed + 1
       die
     ]
@@ -156,23 +157,24 @@ to Go
   ;;call
   SpreadWaterQuality
   BombaAgua
+  KillPlant
 
   ;;CA media
   ask patches[    set AvgWaterQuality AvgWaterQuality + quality ]
 
 
   ;;fix water every 50t
-    if ticks mod 50 = 0[
+  if ticks mod 50 = 0[
     ask patches with [quality < 0] [
 
       let a quality
-     set quality 0
-    let  p patch-at 0 (32 - pycor)
+      set quality 0
+      let  p patch-at 0 (32 - pycor)
       ask p[
         set quality quality + a
       ]
 
-  ]
+    ]
   ]
 
 
@@ -184,8 +186,8 @@ to Go
   if AvgWaterQuality < 0[
     ask patches[set pcolor 90 set quality 0]
     set AvgWaterQuality 0
-  ;;user-message "Toda a agua do aquario esta poluida"
-  ;;stop
+    ;;user-message "Toda a agua do aquario esta poluida"
+    ;;stop
   ]
 
 ;;alimentar
@@ -193,7 +195,7 @@ to Go
     Feed
   ]
 
-tick
+  tick
 end
 
 
@@ -212,7 +214,7 @@ to Feed
 end
 
 to SpreadWaterQuality
-    ask patches [
+  ask patches [
 
 
     if quality <= 99[
@@ -220,12 +222,10 @@ to SpreadWaterQuality
       let p (patch-at 0 -1)
       if  pycor != -32 and ([quality] of p) > (quality - 1) and ([quality] of p) >= 1 [
         set quality quality + 1
-       ifelse quality >= 0[ set pcolor 0.06 * quality + 90 ]  [set pcolor 90 ]
-        if pcolor > 96[ set pcolor 96]
+        PatchColor self
         ask p[
-        set quality quality - 1
-           ifelse quality >= 0[ set pcolor 0.06 * quality + 90 ]  [set pcolor 90 ]
-          if pcolor > 96[ set pcolor 96]
+          set quality quality - 1
+          PatchColor self
         ]
       ]
 
@@ -233,76 +233,64 @@ to SpreadWaterQuality
       set p (patch-at -1 -1)
       if  pycor != -32 and pxcor != -32 and ([quality] of p) > (quality - 1) and ([quality] of p) >= 1[
         set quality quality + 1
-        ifelse quality >= 0[ set pcolor 0.06 * quality + 90 ]  [set pcolor 90 ]
-        if pcolor > 96[ set pcolor 96]
+        PatchColor self
         ask p[
-        set quality quality - 1
-           ifelse quality >= 0[ set pcolor 0.06 * quality + 90 ]  [set pcolor 90 ]
-          if pcolor > 96[ set pcolor 96]
+          set quality quality - 1
+          PatchColor self
         ]
       ]
 
-            ; direita baixo
+      ; direita baixo
       set p (patch-at 1 -1)
       if  pycor != -32 and pxcor != 32 and ([quality] of p) > (quality - 1) and ([quality] of p) >= 1[
         set quality quality + 1
-        ifelse quality >= 0[ set pcolor 0.06 * quality + 90 ]  [set pcolor 90 ]
-        if pcolor > 96[ set pcolor 96]
+        PatchColor self
         ask p[
-        set quality quality - 1
-           ifelse quality >= 0[ set pcolor 0.06 * quality + 90 ]  [set pcolor 90 ]
-          if pcolor > 96[ set pcolor 96]
+          set quality quality - 1
+          PatchColor self
         ]
       ]
 
-            ; esquerda
+      ; esquerda
       set p (patch-at -1 0)
       if  pxcor != -32 and ([quality] of p) > (quality + 1) and ([quality] of p) >= 1[
         set quality quality + 1
-        ifelse quality >= 0[ set pcolor 0.06 * quality + 90 ]  [set pcolor 90 ]
-        if pcolor > 96[ set pcolor 96]
+        PatchColor self
         ask p[
-        set quality quality - 1
-           ifelse quality >= 0[ set pcolor 0.06 * quality + 90 ]  [set pcolor 90 ]
-          if pcolor > 96[ set pcolor 96]
+          set quality quality - 1
+          PatchColor self
         ]
       ]
 
-            ; direita
+      ; direita
       set p (patch-at 1 0)
       if  pxcor != 32 and ([quality] of p) > (quality + 1) and ([quality] of p) >= 1[
         set quality quality + 1
-        ifelse quality >= 0[ set pcolor 0.06 * quality + 90 ]  [set pcolor 90 ]
-        if pcolor > 96[ set pcolor 96]
+        PatchColor self
         ask p[
-        set quality quality - 1
-           ifelse quality >= 0[ set pcolor 0.06 * quality + 90 ]  [set pcolor 90 ]
-          if pcolor > 96[ set pcolor 96]
+          set quality quality - 1
+          PatchColor self
         ]
       ]
 
-            ; cima
+      ; cima
       set p (patch-at 0 1)
       if  pycor != 32 and ([quality] of p) > (quality + 2) and ([quality] of p) >= 1[
         set quality quality + 1
-        ifelse quality >= 0[ set pcolor 0.06 * quality + 90 ]  [set pcolor 90 ]
-        if pcolor > 96[ set pcolor 96]
+        PatchColor self
         ask p[
-        set quality quality - 1
-           ifelse quality >= 0[ set pcolor 0.06 * quality + 90 ]  [set pcolor 90 ]
-          if pcolor > 96[ set pcolor 96]
+          set quality quality - 1
+          PatchColor self
         ]
       ]
-            ;esquerda cima
+      ;esquerda cima
       set p (patch-at -1 1)
       if pxcor != -32 and pycor != 32 and ([quality] of p) > (quality + 2) and ([quality] of p) >= 1[
         set quality quality + 1
-        ifelse quality >= 0[ set pcolor 0.06 * quality + 90 ]  [set pcolor 90 ]
-        if pcolor > 96[ set pcolor 96]
+        PatchColor self
         ask p[
         set quality quality - 1
-           ifelse quality >= 0[ set pcolor 0.06 * quality + 90 ]  [set pcolor 90 ]
-          if pcolor > 96[ set pcolor 96]
+          PatchColor self
         ]
       ]
 
@@ -310,12 +298,10 @@ to SpreadWaterQuality
       set p (patch-at 1 1)
       if pxcor != 32 and pycor != 32 and ([quality] of p) > (quality + 2 ) and ([quality] of p) >= 1[
         set quality quality + 1
-        ifelse quality >= 0[ set pcolor 0.06 * quality + 90 ]  [set pcolor 90 ]
-        if pcolor > 96[ set pcolor 96]
+        PatchColor self
         ask p[
-        set quality quality - 1
-           ifelse quality >= 0[ set pcolor 0.06 * quality + 90 ]  [set pcolor 90 ]
-          if pcolor > 96[ set pcolor 96]
+          set quality quality - 1
+          PatchColor self
         ]
       ]
 
@@ -330,13 +316,15 @@ end
 to BombaAgua
   if BombaDeAgua = true[
   if ticks mod (101 - PurifyRate) = 0[
-  ask patches with [ ( (abs( pxcor ) = 32) or  (abs ( pxcor ) = 31)) and (pycor = -32 or pycor = -31)][
-    set quality quality + ((100 - quality) * PurifyAmount)
-    ]
+      ask patches with [ ( (abs( pxcor ) = 32) or  (abs ( pxcor ) = 31)) and (pycor = -32 or pycor = -31)][
+        set quality quality + ((100 - quality) * PurifyAmount)
+      ]
     ]
   ]
 end
 
+
+;;reproduçao
 
 to BreedF [this targ]
   ask targ[
@@ -358,11 +346,28 @@ to BreedF [this targ]
 
 end
 
+;;cor de fundo
+to PatchColor [this]
+  ask this[
+    ifelse quality >= 0[ set pcolor 0.06 * quality + 90 ]  [set pcolor 90 ]
+    if pcolor > 96[ set pcolor 96]
+    if  pycor < 15 - 32[
+      ifelse quality >= 0 [ set pcolor 0.044 * quality + 40 ] [set pcolor 40]
+    ]
+  ]
+end
+
+to KillPlant
+  ask patches with [quality < 20 and pycor < 15 - 32][
+    ask turtles-here with [breed = plantas][die]
+  ]
+end
+
 to Debug
-create-peixes1 Especie1[
+  create-peixes1 Especie1[
     set color red
-        setxy 5 5
-set heading random 360
+    setxy 5 5
+    set heading random 360
     set size 1.5
     set shape "fish"
     set hp 100
@@ -668,7 +673,7 @@ SWITCH
 333
 BombaDeAgua
 BombaDeAgua
-0
+1
 1
 -1000
 
