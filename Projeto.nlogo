@@ -19,7 +19,7 @@ to Setup
     set shape "plant"
     set size 5
     set color green
-    setxy (32 - (random 64)) ((random 14) - 30)
+    setxy (32 - (random 64)) ((random 13) - 30)
 
   ]
 
