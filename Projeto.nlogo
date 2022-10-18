@@ -3,8 +3,10 @@ breed [comidas comida]
 breed [plantas planta]
 breed [peixes1 peixe1]
 breed [peixes2 peixe2]
+breed [mortos morto]
 peixes1-own[canBreed age hp dieAge breedCD]
 peixes2-own[canBreed age hp dieAge breedCD]
+mortos-own[decay]
 patches-own [quality]
 comidas-own [decay]
 
@@ -58,20 +60,32 @@ end
 
 to Go
   set AvgWaterQuality 0
-  if count turtles with [breed != comidas and breed != plantas] = 0 [
+  if count turtles with [breed != comidas and breed != plantas and breed != mortos] = 0 [
     user-message "Todos os peixes morreram"
     stop
   ]
 
   ;;Dano
-  ask turtles with [breed != comidas and breed != plantas] [
+  ask turtles with [breed != comidas and breed != plantas and breed != mortos] [
     if hp <= 0 [
       set Mortes Mortes + 1
+      hatch-mortos 1[
+        set color gray
+        set heading 180
+        set shape "fish"
+        set decay 100 * size  + (random 100) - 50
+      ]
       die
     ]
     if age >= dieAge [
       set MortesAge MortesAge + 1
       set Mortes Mortes + 1
+      hatch-mortos 1[
+        set color gray
+        set heading 180
+        set shape "fish"
+        set decay 100 * size + (random 100) - 50
+      ]
       die
     ]
     let thisquality [quality] of patch-here
@@ -105,7 +119,7 @@ to Go
     ;;comer
     if  count comidas-here != 0[
       ask one-of comidas-here[die]
-      set size size + 0.01
+      set size size + 0.1
       set hp hp + 25
       if hp > 100 [ set hp 100]
       set FoodEaten FoodEaten + 1
@@ -118,7 +132,7 @@ to Go
     set BreedCD BreedCD - 1
     let thisbreed breed
     let thiswho who
-    let targ (one-of (turtles-here with [who != thiswho and breed = thisbreed and breed != comidas and breed != plantas] ))
+    let targ (one-of (turtles-here with [who != thiswho and breed = thisbreed and breed != comidas and breed != plantas and breed != mortos] ))
     if targ != nobody[
     if( [canBreed] of targ = 1 and canBreed = 1)[
         if breed = peixes1 and age >= MinBreedAgeEspecie1 and [age] of targ >= MinBreedAgeEspecie1 [
@@ -155,6 +169,8 @@ to Go
   ]
 
   ;;call
+  PlantF
+  MortosF
   SpreadWaterQuality
   BombaAgua
   KillPlant
@@ -337,6 +353,7 @@ to BreedF [this targ]
   ]
   if random (100 - Prob_Nascer) = 0[
     hatch 1 [
+      set size 1.5
       set age 0
       set hp 100
       set Nascimentos Nascimentos + 1
@@ -363,14 +380,42 @@ to KillPlant
   ]
 end
 
+to PlantF
+  ask plantas[
+    ask patch-here[
+      ask neighbors [
+        set quality  quality + ((100 - quality) * 0.01)
+      ]
+    ]
+  ]
+end
+
+to MortosF
+  ask mortos[
+    if decay <= 0 [ die ]
+    if pycor != -32 [
+      if ticks mod (random 10 + 1) = 0  [
+        if random-float 1 < 0.2 [
+          set heading one-of[ 135 180 225]
+        ]
+        fd 1
+      ]
+      ]
+    set decay decay - 1
+    ask patch-here[
+      set quality quality - 0.75
+    ]
+  ]
+end
+
 to Debug
-  create-peixes1 Especie1[
-    set color red
-    setxy 5 5
-    set heading random 360
+  create-mortos 200[
+    set color gray
+    setxy 5 -32
+    set heading 180
     set size 1.5
     set shape "fish"
-    set hp 100
+    set decay 500
   ]
   tick
 end
@@ -428,7 +473,7 @@ Especie1
 Especie1
 0
 50
-10.0
+12.0
 1
 1
 NIL
@@ -443,7 +488,7 @@ Especie2
 Especie2
 0
 50
-10.0
+12.0
 1
 1
 NIL
@@ -660,7 +705,7 @@ PurifyRate
 PurifyRate
 0
 100
-50.0
+80.0
 1
 1
 NIL
@@ -686,7 +731,7 @@ PurifyAmount
 PurifyAmount
 0
 1
-0.3
+0.35
 0.01
 1
 NIL
@@ -855,6 +900,17 @@ MONITOR
 249
 Nº de Peixes Vivos
 count peixes1 + count peixes2
+17
+1
+11
+
+MONITOR
+2064
+204
+2173
+249
+Nº Peixes Mortos
+count mortos
 17
 1
 11
