@@ -22,7 +22,6 @@ to Setup
     set size 5
     set color green
     setxy (32 - (random 64)) ((random 13) - 30)
-
   ]
 
   create-peixes1 Especie1[
@@ -381,10 +380,12 @@ to KillPlant
 end
 
 to PlantF
-  ask plantas[
-    ask patch-here[
-      ask neighbors [
-        set quality  quality + ((100 - quality) * 0.01)
+  if ticks mod 10 = 0[
+    ask plantas[
+      ask patch-here[
+        ask neighbors [
+          set quality  quality + ((100 - quality) * 0.01)
+        ]
       ]
     ]
   ]
@@ -520,7 +521,7 @@ BUTTON
 147
 NIL
 Feed\n
-T
+NIL
 1
 T
 OBSERVER
@@ -718,7 +719,7 @@ SWITCH
 333
 BombaDeAgua
 BombaDeAgua
-1
+0
 1
 -1000
 
@@ -731,7 +732,7 @@ PurifyAmount
 PurifyAmount
 0
 1
-0.35
+0.75
 0.01
 1
 NIL
