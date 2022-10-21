@@ -7,7 +7,7 @@ breed [mortos morto]
 peixes1-own[canBreed age hp dieAge breedCD]
 peixes2-own[canBreed age hp dieAge breedCD]
 mortos-own[decay]
-patches-own [quality]
+patches-own [quality] ;qualidade = 100 - lixo
 comidas-own [decay]
 
 to Setup
@@ -150,7 +150,7 @@ to Go
     if pycor != -32[
       if ticks mod (random 10 + 1) = 0  [
         set heading one-of[ 135 180 225]
-      fd 1
+        fd 1
       ]
     ]
 
@@ -481,10 +481,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1190
-16
-1362
-49
+1193
+17
+1365
+50
 Especie2
 Especie2
 0
@@ -617,10 +617,10 @@ NIL
 1
 
 SLIDER
-1190
-66
-1362
-99
+1193
+67
+1365
+100
 Pol_Comida
 Pol_Comida
 10
@@ -668,10 +668,10 @@ PENS
 "y = 0" 1.0 0 -2674135 true "" "plot 0"
 
 SLIDER
-1190
-114
-1362
-147
+1193
+115
+1365
+148
 Prob_Nascer
 Prob_Nascer
 0
@@ -684,9 +684,9 @@ HORIZONTAL
 
 SLIDER
 1003
-162
+163
 1175
-195
+196
 DmgTick
 DmgTick
 0
@@ -698,10 +698,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1007
-348
-1179
-381
+1003
+349
+1175
+382
 PurifyRate
 PurifyRate
 0
@@ -713,9 +713,9 @@ NIL
 HORIZONTAL
 
 SWITCH
-1005
+1003
 300
-1179
+1177
 333
 BombaDeAgua
 BombaDeAgua
@@ -724,10 +724,10 @@ BombaDeAgua
 -1000
 
 SLIDER
-1192
-348
-1364
-381
+1193
+349
+1365
+382
 PurifyAmount
 PurifyAmount
 0
@@ -739,10 +739,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1190
-299
-1363
-332
+1192
+300
+1365
+333
 TicksPerAge
 TicksPerAge
 1
@@ -754,10 +754,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1005
-252
-1178
-285
+1003
+253
+1176
+286
 AvgAgeEspecie1
 AvgAgeEspecie1
 1
@@ -769,10 +769,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1190
-252
-1363
-285
+1192
+253
+1365
+286
 AvgAgeEspecie2
 AvgAgeEspecie2
 1
@@ -829,9 +829,9 @@ MortesAge
 
 SLIDER
 1192
-164
+163
 1365
-197
+196
 BreedCooldown
 BreedCooldown
 0
@@ -843,10 +843,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1005
-208
-1178
-241
+1003
+209
+1176
+242
 MinBreedAgeEspecie1
 MinBreedAgeEspecie1
 0
@@ -859,9 +859,9 @@ HORIZONTAL
 
 SLIDER
 1192
-208
+209
 1365
-241
+242
 MinBreedAgeEspecie2
 MinBreedAgeEspecie2
 0
@@ -908,9 +908,9 @@ count peixes1 + count peixes2
 MONITOR
 2064
 204
-2173
+2189
 249
-Nº Peixes Mortos
+Nº de Peixes Mortos
 count mortos
 17
 1
@@ -1070,6 +1070,44 @@ Polygon -1 true false 75 45 83 77 71 103 86 114 166 78 135 60
 Polygon -7500403 true true 30 136 151 77 226 81 280 119 292 146 292 160 287 170 270 195 195 210 151 212 30 166
 Circle -16777216 true false 215 106 30
 
+fish 2
+false
+0
+Polygon -1 true false 56 133 34 127 12 105 21 126 23 146 16 163 10 194 32 177 55 173
+Polygon -7500403 true true 156 229 118 242 67 248 37 248 51 222 49 168
+Polygon -7500403 true true 30 60 45 75 60 105 50 136 150 53 89 56
+Polygon -7500403 true true 50 132 146 52 241 72 268 119 291 147 271 156 291 164 264 208 211 239 148 231 48 177
+Circle -1 true false 237 116 30
+Circle -16777216 true false 241 127 12
+Polygon -1 true false 159 228 160 294 182 281 206 236
+Polygon -7500403 true true 102 189 109 203
+Polygon -1 true false 215 182 181 192 171 177 169 164 152 142 154 123 170 119 223 163
+Line -16777216 false 240 77 162 71
+Line -16777216 false 164 71 98 78
+Line -16777216 false 96 79 62 105
+Line -16777216 false 50 179 88 217
+Line -16777216 false 88 217 149 230
+
+fish 3
+false
+0
+Polygon -7500403 true true 137 105 124 83 103 76 77 75 53 104 47 136
+Polygon -7500403 true true 226 194 223 229 207 243 178 237 169 203 167 175
+Polygon -7500403 true true 137 195 124 217 103 224 77 225 53 196 47 164
+Polygon -7500403 true true 40 123 32 109 16 108 0 130 0 151 7 182 23 190 40 179 47 145
+Polygon -7500403 true true 45 120 90 105 195 90 275 120 294 152 285 165 293 171 270 195 210 210 150 210 45 180
+Circle -1184463 true false 244 128 26
+Circle -16777216 true false 248 135 14
+Line -16777216 false 48 121 133 96
+Line -16777216 false 48 179 133 204
+Polygon -7500403 true true 241 106 241 77 217 71 190 75 167 99 182 125
+Line -16777216 false 226 102 158 95
+Line -16777216 false 171 208 225 205
+Polygon -1 true false 252 111 232 103 213 132 210 165 223 193 229 204 247 201 237 170 236 137
+Polygon -1 true false 135 98 140 137 135 204 154 210 167 209 170 176 160 156 163 126 171 117 156 96
+Polygon -16777216 true false 192 117 171 118 162 126 158 148 160 165 168 175 188 183 211 186 217 185 206 181 172 171 164 156 166 133 174 121
+Polygon -1 true false 40 121 46 147 42 163 37 179 56 178 65 159 67 128 59 116
+
 flag
 false
 0
@@ -1144,6 +1182,19 @@ Polygon -7500403 true true 165 180 165 210 225 180 255 120 210 135
 Polygon -7500403 true true 135 105 90 60 45 45 75 105 135 135
 Polygon -7500403 true true 165 105 165 135 225 105 255 45 210 60
 Polygon -7500403 true true 135 90 120 45 150 15 180 45 165 90
+
+shark
+false
+0
+Polygon -7500403 true true 283 153 288 149 271 146 301 145 300 138 247 119 190 107 104 117 54 133 39 134 10 99 9 112 19 142 9 175 10 185 40 158 69 154 64 164 80 161 86 156 132 160 209 164
+Polygon -7500403 true true 199 161 152 166 137 164 169 154
+Polygon -7500403 true true 188 108 172 83 160 74 156 76 159 97 153 112
+Circle -16777216 true false 256 129 12
+Line -16777216 false 222 134 222 150
+Line -16777216 false 217 134 217 150
+Line -16777216 false 212 134 212 150
+Polygon -7500403 true true 78 125 62 118 63 130
+Polygon -7500403 true true 121 157 105 161 101 156 106 152
 
 sheep
 false
