@@ -1,11 +1,15 @@
-globals [AvgWaterQuality FoodEaten FoodDestroyed Nascimentos Mortes MortesAge]
+globals [AvgWaterQuality FoodEaten FoodDestroyed Nascimentos Mortes MortesAge FishEaten]
 breed [comidas comida]
 breed [plantas planta]
 breed [peixes1 peixe1]
 breed [peixes2 peixe2]
 breed [mortos morto]
+breed [tubaroes tubarao]
+breed [peixes3 peixe3]
 peixes1-own[canBreed age hp dieAge breedCD]
 peixes2-own[canBreed age hp dieAge breedCD]
+peixes3-own[canBreed age hp dieAge breedCD eatCD]
+tubaroes-own[canBreed age hp dieAge breedCD]
 mortos-own[decay]
 patches-own [quality] ;qualidade = 100 - lixo
 comidas-own [decay]
@@ -44,7 +48,28 @@ to Setup
 
     set dieAge  avgAgeEspecie2 + (random avgAgeEspecie2 / 3) - avgAgeEspecie2 / 6
     set hp 100
+  ]
 
+  create-peixes3 5 + random 5[
+  set color pink
+    setxy random-pxcor random-pycor
+    set heading random 360
+    set size 1.5
+    set shape "fish 2"
+
+    set dieAge  50 + (random 50 / 3) - 50 / 6
+    set hp 100
+  ]
+
+  create-tubaroes 5 + random 5[
+  set color gray
+    setxy (32 - (random 64)) ((random 13) - 30)
+    set heading random 360
+    set size 3
+    set shape "shark"
+
+    set dieAge  50 + (random 50 / 3) - 50 / 6
+    set hp 200
   ]
 
   ask patches [
@@ -94,9 +119,9 @@ to Go
         set thisquality 0
       ]
     ]
-
-    set hp hp - (DmgTick * (3 - (thisquality / 50 )))
-
+    ifelse breed != tubaroes[
+      set hp hp - (DmgTick * (3 - (thisquality / 50 )))
+    ][if ticks > 2000[set hp hp - (DmgTick * (3 - (thisquality / 50 )))]]
     ;;Incrementa Age
     if ticks mod TicksPerAge = 0 [
       set age age + 1
@@ -115,15 +140,74 @@ to Go
       set heading random 360
     ]
 
+    if breed = tubaroes[
+      if pycor >= (13 - 30)[
+        set heading 180
+      ]
+    ]
+
     ;;comer
-    if  count comidas-here != 0[
+    if breed != peixes3[
+    if count comidas-here != 0[
       ask one-of comidas-here[die]
       set size size + 0.1
+      set hp hp + 25
+      ifelse breed != tubaroes[
+      if hp > 100 [ set hp 100]
+      ][if hp > 500 [set hp 500]]
+
+      set FoodEaten FoodEaten + 1
+      if BreedCD <= 0[
+        set canBreed 1
+      ]
+    ]
+    ]
+    if breed = tubaroes[
+      if count mortos-here != 0[
+        ask one-of mortos-here[die]
+        set size size + 0.2
+        set hp hp + 50
+        if hp > 500 [set hp 500]
+        if BreedCD <= 0[
+          set canBreed 1
+        ]
+      ]
+    ]
+    if breed = peixes3[
+      set eatCD eatCD - 1
+
+        if count comidas-here != 0[
+      ask one-of comidas-here[die]
+      set size size + 0.025
       set hp hp + 25
       if hp > 100 [ set hp 100]
       set FoodEaten FoodEaten + 1
       if BreedCD <= 0[
         set canBreed 1
+      ]
+    ]
+
+
+      if eatCD <= 0[
+        let thissize size
+        if count turtles-here with [breed = peixes2 or breed = peixes1] != 0[
+          let target one-of turtles-here with [breed = peixes2 or breed = peixes1]
+          if thissize >= [size] of target  [
+              set size size + 0.15
+              set hp hp + 50
+              if hp > 100[set hp 100]
+            set eatCD 250 + random 250
+            set Mortes Mortes + 1
+              set FishEaten FishEaten + 1
+              if BreedCD <= 0[
+              set canBreed 1
+              ask target[
+              die
+              ]
+
+            ]
+          ]
+        ]
       ]
     ]
 
@@ -138,6 +222,12 @@ to Go
           BreedF self targ
         ]
         if breed = peixes2 and age >= MinBreedAgeEspecie2 and [age] of targ >= MinBreedAgeEspecie2 [
+          BreedF self targ
+        ]
+        if breed = tubaroes and age >= 10 and [age] of targ >= 10 [
+          BreedF self targ
+        ]
+        if breed = peixes3 and age >= 3 and [age] of targ >= 3 [
           BreedF self targ
         ]
   ]
@@ -348,13 +438,22 @@ to BreedF [this targ]
   ]
   ask this [
     set canBreed 0
+    ifelse breed != tubaroes[
     set BreedCD BreedCooldown
+    ][set BreedCD 250]
+    if breed = peixes3[
+      set BreedCD 500
+    ]
   ]
+  if breed = tubaroes and count tubaroes > 20 [stop]
+  if breed = peixes3 and count peixes3 > 15 [stop]
   if random (100 - Prob_Nascer) = 0[
     hatch 1 [
-      set size 1.5
       set age 0
-      set hp 100
+      ifelse breed != tubaroes[
+        set size 1.5
+        set hp 100
+      ][set hp 200 set size 3]
       set Nascimentos Nascimentos + 1
       set BreedCD 0
     ]
@@ -412,7 +511,7 @@ end
 to Debug
   create-mortos 200[
     set color gray
-    setxy 5 -32
+    setxy (32 - (random 64)) ((random 13) - 30)
     set heading 180
     set size 1.5
     set shape "fish"
@@ -513,6 +612,8 @@ true
 PENS
 "Especie 1" 1.0 0 -2674135 true "" "plot count peixes1"
 "Especie 2" 1.0 0 -13345367 true "plot Especie2" "plot count peixes2"
+"Tubaroes" 1.0 0 -7500403 true "" "plot count tubaroes"
+"Especie 3" 1.0 0 -2064490 true "" "plot count peixes3"
 
 BUTTON
 899
@@ -912,6 +1013,17 @@ MONITOR
 249
 Nº de Peixes Mortos
 count mortos
+17
+1
+11
+
+MONITOR
+2146
+88
+2245
+134
+Peixes Comidos
+FishEaten
 17
 1
 11
